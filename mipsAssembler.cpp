@@ -18,32 +18,53 @@
 using namespace std;
 
 //Data Structures
-struct symbol{ const char *label; int address;};
+struct symbol{ 
+
+	char *label; 
+	int address;
+};
 
 vector<symbol> symbolTable;
 vector<int32_t> instructions;
 int32_t currAddress = 0x00400000;
 
+void scanLabels(char* filename);
+void assembleLine(char *line);
+void makeRtype(char* opCode,char* r2,char* r3,char* r4,char* line);
+void makeItype(char* opCode,char* r2,char* r3,char* r4,char* line);
+void makeJtype(char* opCode,char* r2,char* line);
+char* stripReg(char* reg);
+void printTable();
+void displayInstruct(char* line, int32_t mCode);
 
-void scanLabels(char* filename)
-{
+
+int main(){
+	
+	char* filename = "test.txt";//For testing NOT FOR FINAL
+	scanLabels(filename);
+
+	return 0;
+}
+
+void scanLabels(char* filename){
+	
 	string line;
 	ifstream inputfile(filename);
 	
-	if(inputfile.is_open())
-	{
-		while(getline(inputfile, line))
-		{
+	if(inputfile.is_open()){
+		
+		while(getline(inputfile, line)){
+			
 			// if we see a label (defined as ending in a colon)
 			// add it to the symbolTable
-			if(strstr(line.c_str(), ":") != NULL )
-			{
+			if(strstr(line.c_str(), ":") != NULL ){
+				
 				symbol newSymbol;
 				char temp[100];
 				strcpy(temp, line.c_str());
 				
 				//Assigns label's name after stripping colon
-				strcpy(newSymbol.label, strtok(temp, ":"))
+				strcpy(newSymbol.label, strtok(temp, ":"));
 				//then assigns the memory location/address of the label
 				newSymbol.address = currAddress;
 				
@@ -82,23 +103,23 @@ void assembleLine(char *line)
 	
 	if( strstr(opCode, "i") != NULL || 
 		strstr(opCode, "w") != NULL ||
-		strstr(opCode, "b")	!= NULL )
-	{
+		strstr(opCode, "b")	!= NULL ){
+			
 		makeItype(opCode, r2, r3, r4, line);
 	}
 	else if(strstr(opCode, "j") != NULL &&
-			strstr(opCode, "jr") == NULL )
-	{
-		makeJtype(opCode, r2);
+			strstr(opCode, "jr") == NULL ){
+				
+		makeJtype(opCode, r2,line);
 	}
 	else
-		makeRtype(opCode, r2, r3, r4);
+		makeRtype(opCode, r2, r3, r4,line);
 		
 		
 }//assembleLine()
 
-void makeRtype(char* opCode, r2, r3, r4, line)
-{
+void makeRtype(char* opCode,char* r2,char* r3,char* r4,char* line){
+	
 	int32_t mCode = 0;
 	r2 = stripReg(r2);
 	r3 = stripReg(r3);
@@ -106,20 +127,20 @@ void makeRtype(char* opCode, r2, r3, r4, line)
 	
 	int opFunct, rd, rs, rt;
 	
-	for(int i = 0; i < rTypeInstruct.length; i++)
-	{
+	for(int i = 0; i < rTypeInstruct.length(); i++){
+		
 		if(strcmp(opCode,rTypeInstruct[i].name) == 0)
 			opFunct = rTypeInstruct[i].opcode;
 		
 	}//for - opCode instructions
-	for(i = 0; i < registerNum.length; i++)
-	{
+	for(i = 0; i < registerNum.length; i++){
+		
 		if(strcmp(r2,registerNum[i].name) == 0)
-			rd = registerNum[i].address;
+			rd = registerNum[i].regNum;
 		if(strcmp(r3,registerNum[i].name) == 0)
-			rs = registerNum[i].address;
+			rs = registerNum[i].regNum;
 		if(strcmp(r4,registerNum[i].name) == 0)
-			rt = registerNum[i].address;
+			rt = registerNum[i].regNum;
 	}//for - register numbers
 	
 	mCode = 0 << 26;
@@ -132,28 +153,28 @@ void makeRtype(char* opCode, r2, r3, r4, line)
 	displayInstruct(line, mCode);
 }//makeRtype()
 
-void makeItype(char* opCode, r2, r3, r4, line)
-{
+void makeItype(char* opCode,char* r2,char* r3,char* r4,char* line){
+	
 	int32_t mCode = 0;
 	r2 = stripReg(r2);
 	r3 = stripReg(r3);
 	
-	int opFunct, rd, rs;
+	int opFunct, rt, rs;
 	
 	int16_t immed = atoi(r4);
 	
-	for(int i = 0; i < iTypeInstruct.length; i++)
-	{
+	for(int i = 0; i < iTypeInstruct.length; i++){
+		
 		if(strcmp(opCode,iTypeInstruct[i].name) == 0)
 			opFunct = iTypeInstruct[i].opcode;
 		
 	}//for - opCode instructions
-	for(i = 0; i < registerNum.length; i++)
-	{
+	for(i = 0; i < registerNum.length; i++){
+		
 		if(strcmp(r2,registerNum[i].name) == 0)
-			rt = registerNum[i].address;
+			rt = registerNum[i].regNum;
 		if(strcmp(r3,registerNum[i].name) == 0)
-			rs = registerNum[i].address;
+			rs = registerNum[i].regNum;
 	}//for - register numbers
 	
 	
@@ -165,30 +186,23 @@ void makeItype(char* opCode, r2, r3, r4, line)
 	displayInstruct(line, mCode);
 }//makeItype()
 
+void makeJtype(char* opCode,char* r2,char* line){
+	
+}//makeJType();
 
 
-char* stripReg(char* reg)
-{
+
+char* stripReg(char* reg){
 	char* cut = strtok(reg,"$");
 	return cut;
 }
 
-void printTable()
-{
+void printTable(){
 
 }
 
-void displayInstruct(char* line, int32_t mCode)
-{
+void displayInstruct(char* line, int32_t mCode){
+	
 	cout << line << "\t" << currAddress << hex << mCode << endl;
 }
 
-void main()
-{
-
-	scanLabels();
-
-
-
-
-}

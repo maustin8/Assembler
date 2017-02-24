@@ -6,7 +6,7 @@
 
 
 //Struct array that stores each number associated  to each register
-struct {const char* name, int address} registerNum[] = 
+struct {const char* name, int5_t regNum} registerNum[] = 
 	{
 		{ "zero", 00000},
 		{ "a0", 00100 },
