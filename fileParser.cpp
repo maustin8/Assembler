@@ -2,11 +2,18 @@
 *  Contains structs for all of the constant machine code values
 *  associated to components used in MIPS.
 */
-
+#include <stdio.h>
 
 
 //Struct array that stores each number associated  to each register
-struct {const char* name, int5_t regNum} registerNum[] = 
+struct Reg{
+	const char* name;
+	int regNum;
+};
+
+typedef struct Reg Reg;
+
+Reg registerNum[] = 
 	{
 		{ "zero", 00000},
 		{ "a0", 00100 },
@@ -36,7 +43,14 @@ struct {const char* name, int5_t regNum} registerNum[] =
 	};
 
 //Struct array that contains the R-format instruction opcode functions	
-struct {const char* name, int opcode} rTypeInstruct[] = 
+struct rFormat{
+	const char* name; 
+	int opcode;
+}; 
+
+typedef struct rFormat rFormat;
+
+rFormat rTypeInstruct[] = 
 	{
 		{"add",100000},
 		{"jr",001000},
@@ -46,7 +60,14 @@ struct {const char* name, int opcode} rTypeInstruct[] =
 	};
 	
 //Struct array that contains the I-format instruction opcode functions
-struct {const char* name, int opcode} iTypeInstruct[] =
+struct iFormat{
+	const char* name; 
+	int opcode;
+}; 
+
+typedef struct iFormat iFormat;
+
+iFormat iTypeInstruct[] =
 	{
 		{"addi",001000},
 		{"beq",000100},
@@ -58,7 +79,14 @@ struct {const char* name, int opcode} iTypeInstruct[] =
 	};
 
 //Stryct array that contains the J-format instruction opcode functions
-struct {const char* name, int opcode} jTypeInstruct[] =
+struct jFormat{
+	const char* name;
+	int opcode;
+}; 
+
+typedef struct jFormat jFormat;
+
+jFormat jTypeInstruct[] =
 	{
 		{"j",000010},
 		{"jal",000011},
