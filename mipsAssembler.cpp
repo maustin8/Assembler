@@ -96,7 +96,7 @@ void assembleLine(string filename){
 	inputfile.clear();
 	inputfile.seekg(0,ios::beg);
 	
-	char delim [] = " ,\t(";
+	char delim [] = " ,\t)(";
 	char * opCode;
 	char * r2;
 	char * r3 = NULL;
@@ -152,9 +152,22 @@ void assembleLine(string filename){
 void makeRtype(char* opCode,char* r2,char* r3,char* r4,string line){
 	
 	int32_t mCode = 0;
-	r2 = stripReg(r2);
-	r3 = stripReg(r3);
-	r4 = stripReg(r4);
+	
+	if(strstr(opCode,"slt") != NULL){
+		r2 = stripReg(r2);
+		r3 = stripReg(r3);
+		r4 = stripReg(r4);
+		/*
+		cout << "r2 = " << r2 << endl;
+		cout << "r3 = " << r3 << endl;
+		cout << "r4 = " << r4 << endl;
+		*/
+	}
+	else{
+		r2 = stripReg(r2);
+		r3 = stripReg(r3);
+		r4 = stripReg(r4);
+	}
 	/*
 	cout << endl << "r2 = " << r2 << endl;
 	cout << "r3 = " << r3 << endl;
@@ -214,6 +227,7 @@ void makeItype(char* opCode,char* r2,char* r3,char* r4,string line){
 	if(strstr(opCode,"w") != NULL){
 		char* temp = stripReg(r4);
 		immed = atoi(r3);
+		r2 = stripReg(r2);
 		r3 = temp;
 	}
 	else if(strstr(opCode,"b") != NULL){
