@@ -37,6 +37,7 @@ void makeJtype(char* opCode,char* r2,string line);
 char* stripReg(char* reg);
 void printHeader();
 void displayInstruct(string line, int32_t mCode);
+int getLabelAddress(char* label);
 
 
 int main(){
@@ -123,7 +124,7 @@ void assembleLine(string filename){
 			if(r2 != NULL)
 				r3 = strtok(NULL, delim);
 			if(r3 != NULL)
-				r4 = strtok(NULL, delim);	
+				r4 = strtok(NULL, delim);
 	
 			if( strstr(opCode, "i") != NULL || 
 				strstr(opCode, "w") != NULL ||
@@ -154,7 +155,11 @@ void makeRtype(char* opCode,char* r2,char* r3,char* r4,string line){
 	r2 = stripReg(r2);
 	r3 = stripReg(r3);
 	r4 = stripReg(r4);
-	
+	/*
+	cout << endl << "r2 = " << r2 << endl;
+	cout << "r3 = " << r3 << endl;
+	cout << "r4 = " << r4 << endl;
+	*/
 	int opFunct, rd, rs, rt;
 	
 	int indx = -1;
@@ -163,7 +168,6 @@ void makeRtype(char* opCode,char* r2,char* r3,char* r4,string line){
 		if(strcmp(opCode,rTypeInstruct[indx].name) == 0)
 			opFunct = rTypeInstruct[indx].opcode;
 		
-		//cout << "opFunct " << opFunct << endl;
 		
 	}//for - opCode instructions
 	indx = -1;
@@ -172,11 +176,24 @@ void makeRtype(char* opCode,char* r2,char* r3,char* r4,string line){
 		
 		if(strcmp(r2,registerNum[indx].name) == 0)
 			rd = registerNum[indx].regNum;
-		if(strcmp(r3,registerNum[indx].name) == 0)
+		if(strcmp(r3,registerNum[indx].name) == 0){
+			//cout << "HERE IF" << endl;
 			rs = registerNum[indx].regNum;
-		if(strcmp(r4,registerNum[indx].name) == 0)
+			
+		}
+		//cout << "IN BETWEEN" << endl;
+		if(strcmp(r4,registerNum[indx].name) == 0){
+			//cout << "HERE3" << endl;
 			rt = registerNum[indx].regNum;
-	}//for - register numbers
+		}
+	}
+	/*
+	cout << "rd = " << rd << endl;
+	cout << "rs = " << rs << endl;
+	cout << "rt = " << rt << endl;
+	*/
+
+
 	
 	mCode = (0<<26);
 	mCode |= rs << 21;
@@ -192,20 +209,27 @@ void makeItype(char* opCode,char* r2,char* r3,char* r4,string line){
 	
 	int32_t mCode = 0;
 	int16_t immed = 0;
+	int opFunct, rt, rs;
+	
 	if(strstr(opCode,"w") != NULL){
 		char* temp = stripReg(r4);
 		immed = atoi(r3);
 		r3 = temp;
 	}
 	else if(strstr(opCode,"b") != NULL){
-		
+		char* temp = r2;
+		r2 = stripReg(r3);
+		r3 = stripReg(temp);
+		int branchAddress = getLabelAddress(r4);
+		int numInstruct = (branchAddress - currAddress - 4) / 4;
+		immed = numInstruct;
 	}
 	else{	
 		r2 = stripReg(r2);
 		r3 = stripReg(r3);
 		immed = atoi(r4);
 	}
-	int opFunct, rt, rs;
+	
 	int indx = -1;
 	while(iTypeInstruct[++indx].name != NULL){
 		
@@ -223,10 +247,12 @@ void makeItype(char* opCode,char* r2,char* r3,char* r4,string line){
 	}//for - register numbers
 	
 	
-	mCode = (opFunct<<26);
+	mCode = immed;
+	mCode &=~ 0xFFFF0000;
+	mCode |= (opFunct<<26);
 	mCode |= rs << 21;
 	mCode |= rt << 16;
-	mCode |= immed;
+	
 	
 	
 	displayInstruct(line, mCode);
@@ -295,5 +321,15 @@ void displayInstruct(string line, int32_t mCode){
 	printf("%08x",currAddress);
 	cout << "\t";
 	printf("%08x\n",mCode);
+}//displayInstruct()
+
+int getLabelAddress(char* label){
+	
+	for(int indx = 0; indx < symbolTable.size(); indx++){
+		if(strcmp(symbolTable[indx].label,label) == 0)
+			return symbolTable[indx].address;
+	}
+	return -1;
 }
+
 
