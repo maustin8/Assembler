@@ -10,6 +10,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <vector>
+#include <sstream>
 
 //Holds structs
 #include "fileParser.cpp"
@@ -94,7 +95,7 @@ void assembleLine(string filename){
 	inputfile.clear();
 	inputfile.seekg(0,ios::beg);
 	
-	char delim [] = " ,\t";
+	char delim [] = " ,\t(";
 	char * opCode;
 	char * r2;
 	char * r3 = NULL;
@@ -107,8 +108,14 @@ void assembleLine(string filename){
 		cout << line << endl;
 		
 		while(getline(inputfile,line)){
+			
+			size_t pos = line.find(":");
+			string newLine = line.substr(pos+1);
+			
+			pos = newLine.find("#");
+			newLine = newLine.substr(0,pos);
 			char temp[100];
-			strcpy(temp, line.c_str());
+			strcpy(temp, newLine.c_str());
 			opCode = strtok(temp, delim);
 	
 			if(opCode != NULL)
@@ -136,6 +143,7 @@ void assembleLine(string filename){
 		}
 	}else
 		cout << "Unable to open file!" << endl;
+	inputfile.close();
 		
 		
 }//assembleLine()
@@ -155,11 +163,12 @@ void makeRtype(char* opCode,char* r2,char* r3,char* r4,string line){
 		if(strcmp(opCode,rTypeInstruct[indx].name) == 0)
 			opFunct = rTypeInstruct[indx].opcode;
 		
-		cout << "opFunct " << opFunct << endl;
+		//cout << "opFunct " << opFunct << endl;
 		
 	}//for - opCode instructions
 	indx = -1;
 	while(registerNum[++indx].name != NULL){
+		
 		
 		if(strcmp(r2,registerNum[indx].name) == 0)
 			rd = registerNum[indx].regNum;
@@ -169,25 +178,34 @@ void makeRtype(char* opCode,char* r2,char* r3,char* r4,string line){
 			rt = registerNum[indx].regNum;
 	}//for - register numbers
 	
-	mCode = 0 << 26;
+	mCode = (0<<26);
 	mCode |= rs << 21;
 	mCode |= rt << 16;
 	mCode |= rd << 11;
-	mCode |= mCode << 6;
+	mCode |= (0<<6);
 	mCode |= opFunct;
 	
-	//displayInstruct(line, mCode);
+	displayInstruct(line, mCode);
 }//makeRtype()
 
 void makeItype(char* opCode,char* r2,char* r3,char* r4,string line){
 	
 	int32_t mCode = 0;
-	r2 = stripReg(r2);
-	r3 = stripReg(r3);
-	
+	int16_t immed = 0;
+	if(strstr(opCode,"w") != NULL){
+		char* temp = stripReg(r4);
+		immed = atoi(r3);
+		r3 = temp;
+	}
+	else if(strstr(opCode,"b") != NULL){
+		
+	}
+	else{	
+		r2 = stripReg(r2);
+		r3 = stripReg(r3);
+		immed = atoi(r4);
+	}
 	int opFunct, rt, rs;
-	
-	int16_t immed = atoi(r4);
 	int indx = -1;
 	while(iTypeInstruct[++indx].name != NULL){
 		
@@ -197,7 +215,7 @@ void makeItype(char* opCode,char* r2,char* r3,char* r4,string line){
 	}//for - opCode instructions
 	indx = -1;
 	while(registerNum[++indx].name != NULL){
-		
+				
 		if(strcmp(r2,registerNum[indx].name) == 0)
 			rt = registerNum[indx].regNum;
 		if(strcmp(r3,registerNum[indx].name) == 0)
@@ -205,12 +223,13 @@ void makeItype(char* opCode,char* r2,char* r3,char* r4,string line){
 	}//for - register numbers
 	
 	
-	mCode = opFunct << 26;
+	mCode = (opFunct<<26);
 	mCode |= rs << 21;
 	mCode |= rt << 16;
-	mCode |=  immed;
+	mCode |= immed;
 	
-	//displayInstruct(line, mCode);
+	
+	displayInstruct(line, mCode);
 }//makeItype()
 
 void makeJtype(char* opCode,char* r2,string line){
@@ -235,7 +254,7 @@ void makeJtype(char* opCode,char* r2,string line){
 	mCode = opFunct << 26;
 	mCode |= address;
 	
-	//displayInstruct(line, mCode);
+	displayInstruct(line, mCode);
 }//makeJType();
 
 
@@ -269,11 +288,12 @@ void displayInstruct(string line, int32_t mCode){
 		cout << newLine;
 	}
 	else{
-		cout << temp;
+		cout << temp << "\t\t\t\t\t\t";
 	}
 	//cout << endl << "newLine= " << newLine << endl << endl;
 	
 	printf("%08x",currAddress);
-	cout << "\t" << hex << mCode << endl;
+	cout << "\t";
+	printf("%08x\n",mCode);
 }
 
