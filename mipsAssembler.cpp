@@ -26,6 +26,9 @@
  * mipsData.cpp file
  */
 
+//-------------
+// C++ Includes
+//-------------
 #include <iostream>
 #include <istream>
 #include <fstream>
@@ -34,29 +37,142 @@
 #include <stdlib.h>
 #include <vector>
 #include <sstream>
-//Holds structs
 #include "mipsData.cpp"
-//Namespaces
+
+//-----------------
+// Using Statements
+//-----------------
 using namespace std;
-//Data Structures
+
+//-----------------
+// Data Stuctures
+//-----------------
 struct symbol{ 
 	char label[10]; 
 	int32_t address;
 };
 
 typedef struct symbol symbol;
+
+//This vector stores each label and their respective addresses.
+//This is used for branch and jump statements.
 vector<symbol> symbolTable;
+
+//Starting address
 int32_t currAddress = 0x00400000;
 
+/*********************************************************
+* DESCRIPTION - scanLabels
+* Does the first pass of the input data and creates the 
+* symbol table.
+*
+* PARAMETERS
+* string filename: name of the input file
+*
+**********************************************************/
 void scanLabels(string filename);
+
+/*********************************************************
+* DESCRIPTION - assembleLine
+* Performs the second pass of the input data and creates
+* each instruction line by tokenizing each part of the 
+* instruction lines.
+*
+* PARAMETERS
+* string filename: name of the input file
+*
+**********************************************************/
 void assembleLine(string filename);
+
+/*********************************************************
+* DESCRIPTION - makeRtype
+* Creates the machine code for instructions that are in the
+* R-format.
+*
+* PARAMETERS
+* char* opCode: opCode instruction from input file
+* char* r2: 	The rirst register read in from the input line
+* char* r3:		The second register read in from the input line
+* char* r4:		The final register read in from the input line
+* string line:	The entire line from the input file
+*
+**********************************************************/
 void makeRtype(char* opCode,char* r2,char* r3,char* r4,string line);
+
+/*********************************************************
+* DESCRIPTION - makeItype
+* Creates the machine code for instructions that are in the
+* I-format.
+*
+* PARAMETERS
+* char* opCode: opCode instruction from input file
+* char* r2: 	The rirst register read in from the input line
+* char* r3:		The second register read in from the input line
+* char* r4:		The final register read in from the input line
+* string line:	The entire line from the input file
+*
+**********************************************************/
 void makeItype(char* opCode,char* r2,char* r3,char* r4,string line);
+
+/*********************************************************
+* DESCRIPTION - makeJtype
+* Creates the machine code for instructions that are in the
+* J-format.
+*
+* PARAMETERS
+* char* opCode: opCode instruction from input file
+* char* r2: 	The address that will be jumped to
+* string line:	The entire line from the input file
+*
+**********************************************************/
 void makeJtype(char* opCode,char* r2,string line);
 
+/*********************************************************
+* DESCRIPTION - stripReg
+* Strips the $ off of the registers
+*
+* PARAMETERS
+* char* reg: 	register directly from the input file with
+*				the $ still on it
+*
+* RETURNS
+* Returns the register input but with the $ stripped off
+*
+**********************************************************/
 char* stripReg(char* reg);
+
+/*********************************************************
+* DESCRIPTION - printHeader
+* Prints the header of the output up to the start of the 
+* mips instructions.
+*
+**********************************************************/
 void printHeader();
+
+/*********************************************************
+* DESCRIPTION - displayInstruct
+* Prints the mips instruction followed by its respective 
+* address and machine code.
+*
+* PARAMETERS
+* string line:		The full instruction line from the input file
+* int32_t mCode:	The machine code calculated for the instruction
+*
+**********************************************************/
 void displayInstruct(string line, int32_t mCode);
+
+/*********************************************************
+* DESCRIPTION - getLabelAddress
+* Gets the address for a label from the symbol table.
+*
+* PARAMETERS
+* char* label:		The label whose address need to be found
+*					in the symbol table
+*
+* RETURNS
+* The address that the label is located at.
+*
+**********************************************************/
 int getLabelAddress(char* label);
 
 int main(){
@@ -71,6 +187,7 @@ int main(){
 	
 	return 0;
 }//main()
+
 
 void scanLabels(string filename){
 	string line;

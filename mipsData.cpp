@@ -1,3 +1,5 @@
+
+
 /* PROJECT: MIPS Assembler for CSCI361
  * 
  * FILE: mipsAssembler.cpp
@@ -20,13 +22,15 @@
 
 
 //Struct array that stores each number associated  to each register
-struct Reg
-{
+
+struct Reg{
+
 	const char* name;
 	int regNum;
 };
 
 typedef struct Reg Reg;
+
 Reg registerNum[] = 
 	{
 		{ "zero", 0x00},
@@ -55,13 +59,15 @@ Reg registerNum[] =
 	};
 
 //Struct array that contains the R-format instruction opcode functions	
-struct rFormat
-{
+
+struct rFormat{
+
 	const char* name; 
 	int opcode;
 }; 
 
 typedef struct rFormat rFormat;
+
 rFormat rTypeInstruct[] = 
 	{
 		{"add",0x20},
@@ -72,13 +78,15 @@ rFormat rTypeInstruct[] =
 	};
 	
 //Struct array that contains the I-format instruction opcode functions
-struct iFormat
-{
+
+struct iFormat{
+
 	const char* name; 
 	int opcode;
 }; 
 
 typedef struct iFormat iFormat;
+
 iFormat iTypeInstruct[] =
 	{
 		{"addi",0x8},
@@ -91,8 +99,9 @@ iFormat iTypeInstruct[] =
 	};
 
 //Stryct array that contains the J-format instruction opcode functions
-struct jFormat
-{
+
+struct jFormat{
+
 	const char* name;
 	int opcode;
 }; 
