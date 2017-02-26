@@ -98,9 +98,9 @@ void scanLabels(string filename){
 		
 		//Resets for 2nd pass when we read instructions
 		currAddress = 0x00400000;
-	}else{
+	}else
 		cout << "Unable to open file!" << endl;
-	}//if
+	
 }//scanLabels()
 
 void assembleLine(string filename){
@@ -124,6 +124,8 @@ void assembleLine(string filename){
 		cout << line << endl;
 		
 		while(getline(inputfile,line)){
+			
+			//Strip out labels and comments
 			size_t pos = line.find(":");
 			string newLine = line.substr(pos+1);
 			pos = newLine.find("#");
@@ -131,11 +133,15 @@ void assembleLine(string filename){
 			if(pos != string::npos)
 				newLine = newLine.substr(0,pos);
 			
+			/*Check if there is no whitespace at the end of the line
+			 *Without this whitespace the machine code is not calculated
+			 *correctly because it will only grab the memory address of 
+			 *the last register.
+			 */
 			string endChar = newLine.substr(newLine.length()-1);
-			
 			if(endChar != " "){
 				newLine.append("\t");
-			}
+			}//if
 			
 			char temp[100];
 			strcpy(temp, newLine.c_str());
@@ -154,17 +160,17 @@ void assembleLine(string filename){
 				strstr(opCode, "beq")!= NULL){
 				
 				makeItype(opCode, r2, r3, r4, line);
-			}
+			}//if
 			else if(strstr(opCode, "j") != NULL &&
 					strstr(opCode,"jr") == NULL){
 				
 				makeJtype(opCode, r2,line);
-			}
+			}//if
 			else
 				makeRtype(opCode, r2, r3, r4,line);
 			
 			currAddress += 4;
-		}
+		}//while
 	}else
 		cout << "Unable to open file!" << endl;
 	inputfile.close();
@@ -175,39 +181,39 @@ void makeRtype(char* opCode,char* r2,char* r3,char* r4,string line){
 	int opFunct, rd, rs, rt;
 	
 	if(strstr(opCode,"jr") != NULL){
+		//A tab is appended to the "jr" instruction to line up
+		//the address and machine code with everything else
 		string endChar = line.substr(line.length()-1);
 		if(endChar != " "){
 			line.append("\t");
-		}
+		}//if
 		r3 = stripReg(r2);
 		rd = 0x0;
 		rt = 0x0;
-	}
+	}//if - the instruction is a jump register
 	else{
 		r2 = stripReg(r2);
 		r3 = stripReg(r3);
 		r4 = stripReg(r4);
-	}
+	}//else - the instruction is any other R-type instruction
 	
 	int indx = -1;
 	while(rTypeInstruct[++indx].name != NULL){
 		
 		if(strcmp(opCode,rTypeInstruct[indx].name) == 0)
 			opFunct = rTypeInstruct[indx].opcode;
-		}//for - opCode instructions
-		indx = -1;
+	}//while
 	
+	indx = -1;
 	while(registerNum[++indx].name != NULL){
 		
 		if(strcmp(r2,registerNum[indx].name) == 0)
 			rd = registerNum[indx].regNum;
-		if(strcmp(r3,registerNum[indx].name) == 0){
-			rs = registerNum[indx].regNum;
-		}
-		if(strcmp(r4,registerNum[indx].name) == 0){
-			rt = registerNum[indx].regNum;
-		}
-	}
+		if(strcmp(r3,registerNum[indx].name) == 0)
+			rs = registerNum[indx].regNum;		
+		if(strcmp(r4,registerNum[indx].name) == 0)
+			rt = registerNum[indx].regNum;	
+	}//while
 	
 	mCode = (0<<26);
 	mCode |= rs << 21;
@@ -224,12 +230,13 @@ void makeItype(char* opCode,char* r2,char* r3,char* r4,string line){
 	int32_t mCode = 0;
 	int16_t immed = 0;
 	int opFunct, rt, rs;
+		
 	if(strstr(opCode,"w") != NULL){
 		char* temp = stripReg(r4);
 		immed = atoi(r3);
 		r2 = stripReg(r2);
 		r3 = temp;
-	}
+	}//if - the instruction is load word or store word
 	else if(strstr(opCode,"b") != NULL){
 		char* temp = r2;
 		r2 = stripReg(r3);
@@ -237,18 +244,18 @@ void makeItype(char* opCode,char* r2,char* r3,char* r4,string line){
 		int branchAddress = getLabelAddress(r4);
 		int numInstruct = (branchAddress - currAddress - 4) / 4;
 		immed = numInstruct;
-	}
+	}//if - the instruction is a branch instruction
 	else{	
 		r2 = stripReg(r2);
 		r3 = stripReg(r3);
 		immed = atoi(r4);
-	}
+	}//else - the instruction is any other I-type instruction 
 	
 	int indx = -1;
 	while(iTypeInstruct[++indx].name != NULL){
 		if(strcmp(opCode,iTypeInstruct[indx].name) == 0)
 			opFunct = iTypeInstruct[indx].opcode;
-	}
+	}//while
 	
 	indx = -1;
 	while(registerNum[++indx].name != NULL){
@@ -256,7 +263,7 @@ void makeItype(char* opCode,char* r2,char* r3,char* r4,string line){
 			rt = registerNum[indx].regNum;
 		if(strcmp(r3,registerNum[indx].name) == 0)
 			rs = registerNum[indx].regNum;
-	}
+	}//while
 	
 	mCode = immed;
 	mCode &=~ 0xFFFF0000;
@@ -269,18 +276,22 @@ void makeItype(char* opCode,char* r2,char* r3,char* r4,string line){
 
 void makeJtype(char* opCode,char* r2,string line){
 	
+	//Append a tab onto the instruction to make the
+	//address and machine code line up with everything
+	//else
 	string endChar = line.substr(line.length()-1);
 	if(endChar != " "){
 		line.append("\t");
-	}
+	}//if
+	
 	int32_t mCode = 0;
 	int opFunct;
-	int indx = -1;
 	
+	int indx = -1;
 	while(jTypeInstruct[++indx].name != NULL){
 		if(strcmp(opCode,jTypeInstruct[indx].name) == 0)
 			opFunct = jTypeInstruct[indx].opcode;
-	}//for - opCode instructions
+	}//while
 
 	int jumpAdd = getLabelAddress(r2);	
 	
@@ -303,7 +314,7 @@ void printHeader(){
 	for(int indx = 0; indx < symbolTable.size(); indx++){
 		cout << symbolTable.at(indx).label << "\t";
 		printf("%08x\n",symbolTable.at(indx).address);
-	}
+	}//for - all symbols in the symbol table
 	cout << endl << "MIPS code\t\t\t\t\tAddress     Machine Lang." << endl;
 }//printHeader()
 
@@ -316,19 +327,20 @@ void displayInstruct(string line, int32_t mCode){
 	if(strstr(temp,"#") != NULL){
 		newLine = strtok(temp,"#");
 		cout << newLine;
-	}
-	else{
+	}else{
 		cout << temp << "\t\t";
-	}
+	}//if - there is a comment
+	
 	printf("%08x",currAddress);
 	cout << "\t";
 	printf("%08x\n",mCode);
 }//displayInstruct()
 
 int getLabelAddress(char* label){
+	
 	for(int indx = 0; indx < symbolTable.size(); indx++){
 		if(strcmp(symbolTable[indx].label,label) == 0)
 			return symbolTable[indx].address;
-	}
+	}//for - all symbols in the symbol table
 	return -1;
 }//getLabelAddress()
