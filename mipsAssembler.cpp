@@ -26,6 +26,7 @@ struct symbol{
 };
 typedef struct symbol symbol;
 vector<symbol> symbolTable;
+
 vector<int32_t> instructions;
 int32_t currAddress = 0x00400000;
 
@@ -114,7 +115,9 @@ void assembleLine(string filename){
 			string newLine = line.substr(pos+1);
 			
 			pos = newLine.find("#");
+			
 			newLine = newLine.substr(0,pos);
+			
 			char temp[100];
 			strcpy(temp, newLine.c_str());
 			opCode = strtok(temp, delim);
@@ -128,13 +131,13 @@ void assembleLine(string filename){
 	
 			if( strstr(opCode, "i") != NULL || 
 				strstr(opCode, "w") != NULL ||
-				strstr(opCode, "b")	!= NULL ){
+				strstr(opCode, "bne")!= NULL ||
+				strstr(opCode, "beq")!= NULL){
 			
 				makeItype(opCode, r2, r3, r4, line);
 			}
 			else if(strstr(opCode, "j") != NULL &&
-				strstr(opCode, "jr") == NULL ){
-				
+					strstr(opCode,"jr") == NULL){
 				makeJtype(opCode, r2,line);
 			}
 			else
@@ -153,15 +156,13 @@ void makeRtype(char* opCode,char* r2,char* r3,char* r4,string line){
 	
 	int32_t mCode = 0;
 	
-	if(strstr(opCode,"slt") != NULL){
-		r2 = stripReg(r2);
-		r3 = stripReg(r3);
-		r4 = stripReg(r4);
-		/*
-		cout << "r2 = " << r2 << endl;
-		cout << "r3 = " << r3 << endl;
-		cout << "r4 = " << r4 << endl;
-		*/
+	int opFunct, rd, rs, rt;
+	
+	if(strstr(opCode,"jr") != NULL){
+		r3 = stripReg(r2);
+		rd = 0x0;
+		rt = 0x0;
+		
 	}
 	else{
 		r2 = stripReg(r2);
@@ -173,7 +174,7 @@ void makeRtype(char* opCode,char* r2,char* r3,char* r4,string line){
 	cout << "r3 = " << r3 << endl;
 	cout << "r4 = " << r4 << endl;
 	*/
-	int opFunct, rd, rs, rt;
+	
 	
 	int indx = -1;
 	while(rTypeInstruct[++indx].name != NULL){
@@ -276,7 +277,7 @@ void makeJtype(char* opCode,char* r2,string line){
 	
 	int32_t mCode = 0;
 	
-	int opFunct, address;
+	int opFunct;
 	
 	int indx = -1;
 	while(jTypeInstruct[++indx].name != NULL){
@@ -286,13 +287,12 @@ void makeJtype(char* opCode,char* r2,string line){
 		
 	}//for - opCode instructions
 	
-	int jumpAdd = atoi(r2);
-	
-	address = jumpAdd << 6;
+	int jumpAdd = getLabelAddress(r2);	
 	
 	
-	mCode = opFunct << 26;
-	mCode |= address;
+	mCode = jumpAdd;
+	mCode &=~ 0xFF000000;
+	mCode |= opFunct << 26;
 	
 	displayInstruct(line, mCode);
 }//makeJType();
@@ -328,7 +328,7 @@ void displayInstruct(string line, int32_t mCode){
 		cout << newLine;
 	}
 	else{
-		cout << temp << "\t\t\t\t\t\t";
+		cout << temp << "\t\t\t\t";
 	}
 	//cout << endl << "newLine= " << newLine << endl << endl;
 	
