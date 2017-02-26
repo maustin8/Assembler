@@ -7,6 +7,7 @@
 #include <iostream>
 #include <istream>
 #include <fstream>
+#include <string>
 #include <string.h>
 #include <stdlib.h>
 #include <vector>
@@ -27,7 +28,6 @@ struct symbol{
 typedef struct symbol symbol;
 vector<symbol> symbolTable;
 
-vector<int32_t> instructions;
 int32_t currAddress = 0x00400000;
 
 void scanLabels(string filename);
@@ -44,7 +44,7 @@ int getLabelAddress(char* label);
 int main(){
 	
 	string filename;
-	filename = "test.txt";//For testing NOT FOR FINAL
+	filename = "test2.txt";//For testing NOT FOR FINAL
 	scanLabels(filename);
 	printHeader();
 	assembleLine(filename);
@@ -114,12 +114,25 @@ void assembleLine(string filename){
 			size_t pos = line.find(":");
 			string newLine = line.substr(pos+1);
 			
+			
 			pos = newLine.find("#");
+			if(pos != string::npos)
+				newLine = newLine.substr(0,pos);
 			
-			newLine = newLine.substr(0,pos);
 			
+			string endChar = newLine.substr(newLine.length()-1);
+			if(endChar != " "){
+				cout << "WTF" << endl;
+				cout << "OG newLine = " << newLine << endl;
+				newLine.append(" ");
+				newLine.append("yes");
+				cout << "newLine = " << newLine << endl;
+			}
 			char temp[100];
 			strcpy(temp, newLine.c_str());
+			
+			
+			
 			opCode = strtok(temp, delim);
 	
 			if(opCode != NULL)
@@ -158,6 +171,7 @@ void makeRtype(char* opCode,char* r2,char* r3,char* r4,string line){
 	
 	int opFunct, rd, rs, rt;
 	
+
 	if(strstr(opCode,"jr") != NULL){
 		r3 = stripReg(r2);
 		rd = 0x0;
@@ -169,12 +183,6 @@ void makeRtype(char* opCode,char* r2,char* r3,char* r4,string line){
 		r3 = stripReg(r3);
 		r4 = stripReg(r4);
 	}
-	/*
-	cout << endl << "r2 = " << r2 << endl;
-	cout << "r3 = " << r3 << endl;
-	cout << "r4 = " << r4 << endl;
-	*/
-	
 	
 	int indx = -1;
 	while(rTypeInstruct[++indx].name != NULL){
@@ -191,24 +199,13 @@ void makeRtype(char* opCode,char* r2,char* r3,char* r4,string line){
 		if(strcmp(r2,registerNum[indx].name) == 0)
 			rd = registerNum[indx].regNum;
 		if(strcmp(r3,registerNum[indx].name) == 0){
-			//cout << "HERE IF" << endl;
 			rs = registerNum[indx].regNum;
-			
 		}
-		//cout << "IN BETWEEN" << endl;
 		if(strcmp(r4,registerNum[indx].name) == 0){
-			//cout << "HERE3" << endl;
 			rt = registerNum[indx].regNum;
 		}
 	}
-	/*
-	cout << "rd = " << rd << endl;
-	cout << "rs = " << rs << endl;
-	cout << "rt = " << rt << endl;
-	*/
 
-
-	
 	mCode = (0<<26);
 	mCode |= rs << 21;
 	mCode |= rt << 16;
@@ -224,6 +221,8 @@ void makeItype(char* opCode,char* r2,char* r3,char* r4,string line){
 	int32_t mCode = 0;
 	int16_t immed = 0;
 	int opFunct, rt, rs;
+	
+
 	
 	if(strstr(opCode,"w") != NULL){
 		char* temp = stripReg(r4);
@@ -278,6 +277,7 @@ void makeJtype(char* opCode,char* r2,string line){
 	int32_t mCode = 0;
 	
 	int opFunct;
+
 	
 	int indx = -1;
 	while(jTypeInstruct[++indx].name != NULL){
@@ -317,8 +317,6 @@ void printHeader(){
 
 void displayInstruct(string line, int32_t mCode){
 	
-	//cout << endl << "line= " << line << endl;
-
 	char temp[100];
 	strcpy(temp,line.c_str());
 	char* newLine;
@@ -330,7 +328,6 @@ void displayInstruct(string line, int32_t mCode){
 	else{
 		cout << temp << "\t\t\t\t";
 	}
-	//cout << endl << "newLine= " << newLine << endl << endl;
 	
 	printf("%08x",currAddress);
 	cout << "\t";
