@@ -122,11 +122,7 @@ void assembleLine(string filename){
 			
 			string endChar = newLine.substr(newLine.length()-1);
 			if(endChar != " "){
-				cout << "WTF" << endl;
-				cout << "OG newLine = " << newLine << endl;
-				newLine.append(" ");
-				newLine.append("yes");
-				cout << "newLine = " << newLine << endl;
+				newLine.append("\t\t");
 			}
 			char temp[100];
 			strcpy(temp, newLine.c_str());
