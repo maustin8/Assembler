@@ -1,8 +1,30 @@
-//
-//  main.cpp
-//  MIPS Assembler
-//
-//
+/* PROJECT: MIPS Assembler for CSCI361
+ * 
+ * FILE: mipsAssembler.cpp
+ *
+ * EXECUTION ENVIRONMENTS
+ * Montana Tech Katie server
+ *
+ * HISTORY
+ * Date			Author			Description
+ * ====			======			===========
+ * 02/23/17	Max Austin & Alex Reid  	Began implementation, built scanLabels and assembleLine
+ * 02/24/17	Max Austin & Alex Reid		85% of implmentation done, formatting/logic errors arose
+ * 02/25/17	Max Austin & Alex Reid		Finished implmentation, bugs found and squashed!
+ *
+ * DESCRIPTION
+ * A two-pass assembler that translates a subset of the MIPS instruction set to machine code. 
+ * This assembler uses only the .text segment of MIPS instruction code.
+ * At a high level, the functionality of our assembler can be divided as follows:
+ * Pass 1: Reads the input file. The address of each label is recorded into the symbol table. 
+ * Pass 2: Re-reads the input file and translates each instruction to machine code.
+ * Comments are stripped here and the current address is incremented and displayed each line.
+ * Instruction syntax and arguments are validated one line at a time, and then the functions 
+ * to assemble the correct instruction type and to subsequently display it are called.
+ *
+ * Structs that contain the registers and opCodes for each instruction type are found in the included
+ * mipsData.cpp file
+ */
 
 //-------------
 // C++ Includes
@@ -165,6 +187,7 @@ int main(){
 	
 	return 0;
 }//main()
+
 
 void scanLabels(string filename){
 	string line;

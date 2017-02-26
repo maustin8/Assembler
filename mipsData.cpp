@@ -1,12 +1,30 @@
-/* File: fileParser.c
-*  Contains structs for all of the constant machine code values
-*  associated to components used in MIPS.
-*/
+
+
+/* PROJECT: MIPS Assembler for CSCI361
+ * 
+ * FILE: mipsAssembler.cpp
+ *
+ * EXECUTION ENVIRONMENTS
+ * Montana Tech Katie server
+ *
+ * HISTORY
+ * Date			Author			Description
+ * ====			======			===========
+ * 02/23/17	Max Austin & Alex Reid  	Implemented mipsData class
+ * 02/24/17	Max Austin & Alex Reid		Changed values to hexadecimal, easier
+ *
+ * DESCRIPTION
+ * Contains structs for all of the constant machine code 
+ * values associated to components used in MIPS.
+ */
+
 #include <stdio.h>
 
 
 //Struct array that stores each number associated  to each register
+
 struct Reg{
+
 	const char* name;
 	int regNum;
 };
@@ -41,7 +59,9 @@ Reg registerNum[] =
 	};
 
 //Struct array that contains the R-format instruction opcode functions	
+
 struct rFormat{
+
 	const char* name; 
 	int opcode;
 }; 
@@ -58,7 +78,9 @@ rFormat rTypeInstruct[] =
 	};
 	
 //Struct array that contains the I-format instruction opcode functions
+
 struct iFormat{
+
 	const char* name; 
 	int opcode;
 }; 
@@ -77,7 +99,9 @@ iFormat iTypeInstruct[] =
 	};
 
 //Stryct array that contains the J-format instruction opcode functions
+
 struct jFormat{
+
 	const char* name;
 	int opcode;
 }; 
