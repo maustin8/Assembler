@@ -15,7 +15,7 @@
 #include <stdlib.h>
 #include <vector>
 #include <sstream>
-#include "fileParser.cpp"
+#include "mipsData.cpp"
 
 //-----------------
 // Using Statements
